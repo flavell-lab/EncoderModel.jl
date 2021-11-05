@@ -1,6 +1,6 @@
 module EncoderModel
 
-using NLopt, ForwardDiff, StatsBase
+using NLopt, ForwardDiff, StatsBase, Statistics
 include("model.jl")
 
 export 
