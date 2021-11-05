@@ -2,6 +2,32 @@ logistic(x,x0,k) = 1 / (1 + exp(-k * (x - x0)))
 leaky_logistic(x,x0,k,m) = logistic(x,x0,k) + m * (x-x0)
 lesser(x,x0) = leaky_logistic(x,x0,100,1e-3)
 
+
+function cost_rss(y, y_pred)
+    sum((y .- y_pred) .^ 2)
+end
+
+function cost_abs(y, y_pred)
+    sum(abs.(y .- y_pred))
+end
+
+function cost_mse(y, y_pred)
+    mean((y .- y_pred) .^ 2)
+end
+
+function cost_cor(y, y_pred)
+    - cor(y, y_pred)
+end
+
+function reg_var_L1(list_θ, list_σ2)
+    sum(abs.(list_θ ./ (list_σ2 .+ 1)))
+end
+
+function reg_var_L2(list_θ, list_σ2)
+    sum((list_θ ./ (list_σ2 .+ 1)) .^ 2)
+end
+
+
 function ewma(γ::T, x, idx_splits) where {T}
     return_array = zeros(T, idx_splits[end][end])
     for split = idx_splits
@@ -27,7 +53,7 @@ function generate_model_nl3_vhp(behaviors, idx_splits)
     pumping = behaviors[3]
     
     return function (ps)
-        ps[11] .+ (exp.((ps[1] .* ewma(ps[10], velocity) .+
+        ps[11] .+ (exp.((ps[1] .* ewma(ps[10], velocity, idx_splits) .+
                 ps[2] .* ewma(ps[10], 1 .- 2 .* lesser.(ps[3], velocity), idx_splits) .+
                 ps[4] .* ewma(ps[10], θh, idx_splits) .+
                 ps[5] .* ewma(ps[10], 1 .- 2 .* lesser.(ps[6], θh), idx_splits) .+
@@ -76,28 +102,4 @@ function fit_model_bound_nlopt(traces, model_generator, f_cost, ps_0, ps_min, ps
     end
 
     NLopt.optimize(opt, ps_0), opt.numevals # ((final cost, u_opt, exit code), num f eval)
-end
-
-function cost_rss(y, y_pred)
-    sum((y .- y_pred) .^ 2)
-end
-
-function cost_abs(y, y_pred)
-    sum(abs.(y .- y_pred))
-end
-
-function cost_mse(y, y_pred)
-    mean((y .- y_pred) .^ 2)
-end
-
-function cost_cor(y, y_pred)
-    - cor(y, y_pred)
-end
-
-function reg_var_L1(list_θ, list_σ2)
-    sum(abs.(list_θ ./ (list_σ2 .+ 1)))
-end
-
-function reg_var_L2(list_θ, list_σ2)
-    sum((list_θ ./ (list_σ2 .+ 1)) .^ 2)
 end
