@@ -1,6 +1,6 @@
 logistic(x,x0,k) = 1 / (1 + exp(-k * (x - x0)))
 leaky_logistic(x,x0,k,m) = logistic(x,x0,k) + m * (x-x0)
-lesser(x,x0) = leaky_logistic(x,x0,100,1e-3)
+lesser(x,x0) = leaky_logistic(x,x0,50,1e-3)
 
 
 function cost_rss(y, y_pred)
