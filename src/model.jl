@@ -46,23 +46,49 @@ function ewma(γ::T, x, idx_splits) where {T}
 end
 
 
-
-function generate_model_nl3_vhp(behaviors, idx_splits)
-    velocity = behaviors[1]
-    θh = behaviors[2]
-    pumping = behaviors[3]
+function generate_model_nl3_1var(behaviors, idx_splits)
+    var1 = behaviors[1]
     
     return function (ps)
-        ps[11] .+ (exp.((ps[1] .* ewma(ps[10], velocity, idx_splits) .+
-                ps[2] .* ewma(ps[10], 1 .- 2 .* lesser.(ps[3], velocity), idx_splits) .+
-                ps[4] .* ewma(ps[10], θh, idx_splits) .+
-                ps[5] .* ewma(ps[10], 1 .- 2 .* lesser.(ps[6], θh), idx_splits) .+
-                ps[7] .* ewma(ps[10], pumping, idx_splits) .+
-                ps[8] .* ewma(ps[10], 1 .- 2 .* lesser.(ps[9], pumping), idx_splits))
+        ps[5] .+ (exp.((ps[1] .* EncoderModel.ewma(ps[4], var1, idx_splits) .+
+                ps[2] .* EncoderModel.ewma(ps[4], 1 .- 2 .* lesser.(ps[3], var1), idx_splits))
             )
         )
     end
 end
+
+function generate_model_nl3_2var(behaviors, idx_splits)
+    var1 = behaviors[1]
+    var2 = behaviors[2]
+    
+    return function(ps)
+        ps[8] .+ (exp.((ps[1] .* EncoderModel.ewma(ps[7], var1, idx_splits) .+
+                ps[2] .* EncoderModel.ewma(ps[7], 1 .- 2 .* lesser.(ps[3], var1), idx_splits) .+
+                ps[4] .* EncoderModel.ewma(ps[7], var2, idx_splits) .+
+                ps[5] .* EncoderModel.ewma(ps[7], 1 .- 2 .* lesser.(ps[6], var2), idx_splits))
+            )
+        )
+    end
+end
+
+function generate_model_nl3_3var(behaviors, idx_splits)
+    var1 = behaviors[1]
+    var2 = behaviors[2]
+    var3 = behaviors[3]
+    
+    return function (ps)
+        ps[11] .+ (exp.((ps[1] .* ewma(ps[10], var1, idx_splits) .+
+                ps[2] .* ewma(ps[10], 1 .- 2 .* lesser.(ps[3], var1), idx_splits) .+
+                ps[4] .* ewma(ps[10], var2, idx_splits) .+
+                ps[5] .* ewma(ps[10], 1 .- 2 .* lesser.(ps[6], var2), idx_splits) .+
+                ps[7] .* ewma(ps[10], var3, idx_splits) .+
+                ps[8] .* ewma(ps[10], 1 .- 2 .* lesser.(ps[9], var3), idx_splits))
+            )
+        )
+    end
+end
+
+
 
 
 function fit_model_bound_nlopt(traces, model_generator, f_cost, ps_0, ps_min, ps_max,

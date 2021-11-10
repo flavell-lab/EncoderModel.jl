@@ -7,7 +7,9 @@ export
     # model.jl
     lesser,
     ewma,
-    generate_model_nl3_vhp,
+    generate_model_nl3_1var,
+    generate_model_nl3_2var,
+    generate_model_nl3_3var,
     fit_model_bound_nlopt,
     cost_rss,
     cost_abs,
