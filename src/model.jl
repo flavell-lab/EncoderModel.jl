@@ -3,31 +3,6 @@ leaky_logistic(x,x0,k,m) = logistic(x,x0,k) + m * (x-x0)
 lesser(x,x0) = leaky_logistic(x,x0,50,1e-3)
 
 
-function cost_rss(y, y_pred)
-    sum((y .- y_pred) .^ 2)
-end
-
-function cost_abs(y, y_pred)
-    sum(abs.(y .- y_pred))
-end
-
-function cost_mse(y, y_pred)
-    mean((y .- y_pred) .^ 2)
-end
-
-function cost_cor(y, y_pred)
-    - cor(y, y_pred)
-end
-
-function reg_var_L1(list_θ, list_σ2)
-    sum(abs.(list_θ ./ (list_σ2 .+ 1)))
-end
-
-function reg_var_L2(list_θ, list_σ2)
-    sum((list_θ ./ (list_σ2 .+ 1)) .^ 2)
-end
-
-
 function ewma(γ::T, x, idx_splits) where {T}
     return_array = zeros(T, idx_splits[end][end])
     for split = idx_splits

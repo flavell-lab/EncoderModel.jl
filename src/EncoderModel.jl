@@ -1,6 +1,6 @@
 module EncoderModel
 
-using NLopt, ForwardDiff, StatsBase, Statistics
+using NLopt, ForwardDiff, StatsBase, Statistics, AnalysisBase
 include("model.jl")
 
 export 
@@ -8,11 +8,5 @@ export
     lesser,
     ewma,
     generate_model_nl3_vhp,
-    fit_model_bound_nlopt,
-    cost_rss,
-    cost_abs,
-    cost_mse,
-    cost_cor,
-    reg_var_L1,
-    reg_var_L2
+    fit_model_bound_nlopt
 end # module
