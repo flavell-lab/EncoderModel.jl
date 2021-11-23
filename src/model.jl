@@ -20,12 +20,12 @@ function ewma(λ::T, x, idx_splits) where {T}
     return return_array
 end
 
-function generate_model_nl5(xs, idx_splits)
-    x1 = xs[1,:] # velocity
-    x2 = xs[2,:] # θh
-    x3 = xs[3,:] # pumping
-    x4 = xs[4,:] # ang vel
-    x5 = xs[5,:] #curvature
+function generate_model_nl5(xs_s, idx_splits)
+    x1 = xs_s[1,:] # velocity
+    x2 = xs_s[2,:] # θh
+    x3 = xs_s[3,:] # pumping
+    x4 = xs_s[4,:] # ang vel
+    x5 = xs_s[5,:] #curvature
     
     return function (ps)
         ps[18] .+ ps[17] .* ewma(ps[16],
@@ -46,12 +46,12 @@ function generate_model_nl5(xs, idx_splits)
     end
 end
 
-function generate_model_nl5_partial(xs, idx_splits, idx_valid)
-    x1 = xs[1,:] # velocity
-    x2 = xs[2,:] # θh
-    x3 = xs[3,:] # pumping
-    x4 = xs[4,:] # ang vel
-    x5 = xs[5,:] #curvature
+function generate_model_nl5_partial(xs_s, idx_splits, idx_valid)
+    x1 = xs_s[1,:] # velocity
+    x2 = xs_s[2,:] # θh
+    x3 = xs_s[3,:] # pumping
+    x4 = xs_s[4,:] # ang vel
+    x5 = xs_s[5,:] #curvature
     
     return function (ps_::AbstractVector{T}) where T
         ps = zeros(T, 18)
@@ -72,4 +72,32 @@ function generate_model_nl5_partial(xs, idx_splits, idx_valid)
             (sin(ps[13]) .* x5 .+ cos(ps[13])) .*
             (sin(ps[14]) .* (1 .- 2 .* lesser.(x5, ps[15])) .+ cos(ps[14])), idx_splits)
     end
+end
+
+function init_ps_model5(xs, idx_predictor)
+    n_xs = length(idx_predictor)
+    
+    ps_0 = vcat(repeat([0.0, 0.0, 0.0], n_xs), [0.1, 1., 0.])
+    ps_min = vcat(repeat([-pi/2], n_xs * 3), [0.001, -2, -2])
+    ps_max = vcat(repeat([pi/2], n_xs * 3), [1.0, 2., 2.])
+    
+    list_idx_ps_reg = []
+    list_idx_ps = []
+    for (i, b) = enumerate(idx_predictor)
+        ps_min[3*i], ps_max[3*i] = percentile(zstd(xs[b,:]), [0,95])
+        if b != 3
+            ps_0[3*i] = mean(xs[b,:]) # 0 before zstd
+        else # pumping threshold
+            ps_0[3*i] = 0. # mean before zstd
+        end
+        push!(list_idx_ps, 3*b-2)
+        push!(list_idx_ps, 3*b-1)
+        push!(list_idx_ps, 3*b)
+
+        push!(list_idx_ps_reg, 3*i-2)
+        push!(list_idx_ps_reg, 3*i-1)
+    end
+    append!(list_idx_ps, [16,17])
+    
+    ps_0, ps_min, ps_max, list_idx_ps, list_idx_ps_reg
 end
