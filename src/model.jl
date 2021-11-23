@@ -1,15 +1,15 @@
+zstd = FlavellBase.standardize
 logistic(x,x0,k) = 1 / (1 + exp(-k * (x - x0)))
-leaky_logistic(x,x0,k,m) = logistic(x,x0,k) + m * (x-x0)
+leaky_logistic(x,x0,k,m) = logistic(x,x0,k) + m * (x - x0)
 lesser(x,x0) = leaky_logistic(x,x0,50,1e-3)
 
-
-function ewma(γ::T, x, idx_splits) where {T}
+function ewma(λ::T, x, idx_splits) where {T}
     return_array = zeros(T, idx_splits[end][end])
     for split = idx_splits
         max_t = length(split)
         x_avg = zeros(T, max_t)
-        s = sum([exp(-(max_t-t)*γ) for t=1:max_t])
-        x_avg[1] = T(x[split[1]]/s)
+        s = sum([exp(-(max_t-t)*λ) for t=1:max_t])
+        x_avg[1] = T(0.)
         for t=2:max_t
             t_x = split[1] + t -1
             x_avg[t] = T(x_avg[t-1] * (s-1) / s + x[t_x] / s)
@@ -20,87 +20,56 @@ function ewma(γ::T, x, idx_splits) where {T}
     return return_array
 end
 
-
-function generate_model_nl3_1var(behaviors, idx_splits)
-    var1 = behaviors[1]
+function generate_model_nl5(xs, idx_splits)
+    x1 = xs[1,:] # velocity
+    x2 = xs[2,:] # θh
+    x3 = xs[3,:] # pumping
+    x4 = xs[4,:] # ang vel
+    x5 = xs[5,:] #curvature
     
     return function (ps)
-        ps[5] .+ (exp.((ps[1] .* EncoderModel.ewma(ps[4], var1, idx_splits) .+
-                ps[2] .* EncoderModel.ewma(ps[4], 1 .- 2 .* lesser.(ps[3], var1), idx_splits))
-            )
-        )
+        ps[18] .+ ps[17] .* ewma(ps[16],
+            (sin(ps[1]) .* x1 .+ cos(ps[1])) .*
+            (sin(ps[2]) .* (1 .- 2 .* lesser.(x1, ps[3])) .+ cos(ps[2])) .*
+
+            (sin(ps[4]) .* x2 .+ cos(ps[4])) .*
+            (sin(ps[5]) .* (1 .- 2 .* lesser.(x2, ps[6])) .+ cos(ps[5])) .*
+
+            (sin(ps[7]) .* x3 .+ cos(ps[7])) .*
+            (sin(ps[8]) .* (1 .- 2 .* lesser.(x3, ps[9])) .+ cos(ps[8])) .*
+
+            (sin(ps[10]) .* x4 .+ cos(ps[10])) .*
+            (sin(ps[11]) .* (1 .- 2 .* lesser.(x4, ps[12])) .+ cos(ps[11])) .*
+
+            (sin(ps[13]) .* x5 .+ cos(ps[13])) .*
+            (sin(ps[14]) .* (1 .- 2 .* lesser.(x5, ps[15])) .+ cos(ps[14])), idx_splits)
     end
 end
 
-function generate_model_nl3_2var(behaviors, idx_splits)
-    var1 = behaviors[1]
-    var2 = behaviors[2]
+function generate_model_nl5_partial(xs, idx_splits, idx_valid)
+    x1 = xs[1,:] # velocity
+    x2 = xs[2,:] # θh
+    x3 = xs[3,:] # pumping
+    x4 = xs[4,:] # ang vel
+    x5 = xs[5,:] #curvature
     
-    return function(ps)
-        ps[8] .+ (exp.((ps[1] .* EncoderModel.ewma(ps[7], var1, idx_splits) .+
-                ps[2] .* EncoderModel.ewma(ps[7], 1 .- 2 .* lesser.(ps[3], var1), idx_splits) .+
-                ps[4] .* EncoderModel.ewma(ps[7], var2, idx_splits) .+
-                ps[5] .* EncoderModel.ewma(ps[7], 1 .- 2 .* lesser.(ps[6], var2), idx_splits))
-            )
-        )
+    return function (ps_::AbstractVector{T}) where T
+        ps = zeros(T, 18)
+        ps[idx_valid] .= ps_
+        ps[18] .+ ps[17] .* ewma(ps[16],
+            (sin(ps[1]) .* x1 .+ cos(ps[1])) .*
+            (sin(ps[2]) .* (1 .- 2 .* lesser.(x1, ps[3])) .+ cos(ps[2])) .*
+
+            (sin(ps[4]) .* x2 .+ cos(ps[4])) .*
+            (sin(ps[5]) .* (1 .- 2 .* lesser.(x2, ps[6])) .+ cos(ps[5])) .*
+
+            (sin(ps[7]) .* x3 .+ cos(ps[7])) .*
+            (sin(ps[8]) .* (1 .- 2 .* lesser.(x3, ps[9])) .+ cos(ps[8])) .*
+
+            (sin(ps[10]) .* x4 .+ cos(ps[10])) .*
+            (sin(ps[11]) .* (1 .- 2 .* lesser.(x4, ps[12])) .+ cos(ps[11])) .*
+
+            (sin(ps[13]) .* x5 .+ cos(ps[13])) .*
+            (sin(ps[14]) .* (1 .- 2 .* lesser.(x5, ps[15])) .+ cos(ps[14])), idx_splits)
     end
-end
-
-function generate_model_nl3_3var(behaviors, idx_splits)
-    var1 = behaviors[1]
-    var2 = behaviors[2]
-    var3 = behaviors[3]
-    
-    return function (ps)
-        ps[11] .+ (exp.((ps[1] .* ewma(ps[10], var1, idx_splits) .+
-                ps[2] .* ewma(ps[10], 1 .- 2 .* lesser.(ps[3], var1), idx_splits) .+
-                ps[4] .* ewma(ps[10], var2, idx_splits) .+
-                ps[5] .* ewma(ps[10], 1 .- 2 .* lesser.(ps[6], var2), idx_splits) .+
-                ps[7] .* ewma(ps[10], var3, idx_splits) .+
-                ps[8] .* ewma(ps[10], 1 .- 2 .* lesser.(ps[9], var3), idx_splits))
-            )
-        )
-    end
-end
-
-
-
-
-function fit_model_bound_nlopt(traces, model_generator, f_cost, ps_0, ps_min, ps_max,
-        idx_trace, behaviors, optimizer_g, optimizer_l, idx_splits;
-        max_time=60, max_evals=20000, xtol=1e-4, ftol=1e-4, train=1:1600, λ=0)
-
-    list_σ2 = [var(behaviors[(i+1)÷2]) for i in 1:2*length(behaviors)]
-    ps_idx = [i + (i-1)÷2 for i in 1:2*length(behaviors)]
-
-    model_fn = model_generator(behaviors, idx_splits)
-
-    f(ps) = f_cost(model_fn(ps)[train], traces[idx_trace,train]) + λ * reg_var_L2(ps[ps_idx], list_σ2)
-    g(ps) = ForwardDiff.gradient(f, ps)
-    function cost(ps::Vector, grad::Vector)
-        if length(grad) > 0
-            grad .= g(ps)
-        end
-        return f(ps)
-    end
-
-    n_ps = length(ps_0)
-    opt = Opt(optimizer_g, n_ps)
-    opt.min_objective = cost
-    opt.maxtime = max_time
-    opt.maxeval = max_evals
-    opt.lower_bounds = ps_min
-    opt.upper_bounds = ps_max
-    opt.min_objective = cost
-    opt.xtol_rel = xtol
-    opt.ftol_rel = ftol
-
-    if !isnothing(optimizer_l)
-        local_optimizer = Opt(optimizer_l, n_ps)
-        local_optimizer.xtol_rel = xtol
-        local_optimizer.ftol_rel = ftol
-        local_optimizer!(opt, local_optimizer)
-    end
-
-    NLopt.optimize(opt, ps_0), opt.numevals # ((final cost, u_opt, exit code), num f eval)
 end
