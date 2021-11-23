@@ -9,6 +9,7 @@ export
     ewma,
     generate_model_nl5,
     generate_model_nl5_partial,
+    init_ps_model5,
 
     # fit.jl
     fit_model_glopt_bound,
