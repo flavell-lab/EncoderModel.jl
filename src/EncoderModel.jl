@@ -13,7 +13,6 @@ export
 
     # model.jl
     ewma,
-    # nl5
     generate_model_nl5,
     generate_model_nl5_partial,
     init_ps_model_nl5,
