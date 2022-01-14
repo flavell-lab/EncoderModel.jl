@@ -9,14 +9,14 @@ function ewma(λ::T, x, idx_splits) where {T}
         max_t = length(split)
         x_avg = zeros(T, max_t)
         s = sum([exp(-(max_t-t)*λ) for t=1:max_t])
-        x_avg[1] = T(0.)
+        x_avg[1] = x[1] / s
         for t=2:max_t
             t_x = split[1] + t -1
             x_avg[t] = T(x_avg[t-1] * (s-1) / s + x[t_x] / s)
         end
         return_array[split] = x_avg
     end
-    
+
     return return_array
 end
 
