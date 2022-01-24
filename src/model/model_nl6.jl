@@ -112,8 +112,8 @@ function init_ps_model_nl6(xs, idx_predictor=[1,2,3,4,5])
         end
     end
     ps_0 = vcat(ps_0..., [0.1, 1., 0.])
-    ps_min = vcat(ps_min..., [0.001, -4., -2.])
-    ps_max = vcat(ps_max..., [1., 4., 2.])
+    ps_min = vcat(ps_min..., [0.015, -10., -10.])
+    ps_max = vcat(ps_max..., [1., 10., 10.])
     
     
     list_idx_ps = vcat(list_idx_ps[idx_predictor]..., [14,15,16])
