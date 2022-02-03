@@ -1,7 +1,7 @@
 zstd = FlavellBase.standardize
 logistic(x,x0,k) = 1 / (1 + exp(-k * (x - x0)))
 leaky_logistic(x,x0,k,m) = logistic(x,x0,k) + m * (x - x0)
-lesser(x,x0) = leaky_logistic(x,x0,50,1e-3)
+lesser(x,x0) = leaky_logistic(x0,x,50,1e-3)
 
 function ewma(λ::T, x, idx_splits) where {T}
     return_array = zeros(T, idx_splits[end][end])
