@@ -13,10 +13,21 @@ export
 
     # model.jl
     ewma,
+    # nl6
     generate_model_nl5,
     generate_model_nl5_partial,
     init_ps_model_nl5,
+    
+    # nl6
     generate_model_nl6,
     generate_model_nl6_partial,
-    init_ps_model_nl6
+    init_ps_model_nl6,
+    generate_model_nl6a,
+    init_ps_model_nl6a,
+    generate_model_nl6b,
+    init_ps_model_nl6b,
+    generate_model_nl6c,
+    init_ps_model_nl6c,
+    generate_model_nl6d,
+    init_ps_model_nl6d
 end
