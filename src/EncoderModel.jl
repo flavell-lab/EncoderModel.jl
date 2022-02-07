@@ -13,7 +13,12 @@ export
 
     # model.jl
     ewma,
-    # nl6
+    ModelEncoder,
+    n_ps,
+    generate_model_f!,
+    init_model_ps!,
+
+    # nl5
     generate_model_nl5,
     generate_model_nl5_partial,
     init_ps_model_nl5,
@@ -29,5 +34,11 @@ export
     generate_model_nl6c,
     init_ps_model_nl6c,
     generate_model_nl6d,
-    init_ps_model_nl6d
+    init_ps_model_nl6d,
+    ModelEncoderNL6,
+    ModelEncoderNL6a,
+    ModelEncoderNL6b,
+    ModelEncoderNL6c,
+    ModelEncoderNL6d
+
 end

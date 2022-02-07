@@ -20,5 +20,15 @@ function ewma(λ::T, x, idx_splits) where {T}
     return return_array
 end
 
+abstract type ModelEncoder end
+
+function n_ps(model::ModelEncoder)
+    length(model.ps_0)
+end
+
 include("model/model_nl5.jl")
 include("model/model_nl6.jl")
+include("model/model_nl6a.jl")
+include("model/model_nl6b.jl")
+include("model/model_nl6c.jl")
+include("model/model_nl6d.jl")
