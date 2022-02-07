@@ -98,7 +98,7 @@ function init_ps_model_nl6(xs, idx_predictor=[1,2,3,4,5])
     ps_min = []
     ps_max = []
     list_idx_ps = [[1,2,3], [4,5,6], [7], [8,9,10], [11,12,13]]
-    list_idx_ps_reg = [[1,2,3], [4,5,6], [7], [8,9,10], [11,12,13]]
+    list_idx_ps_reg = [[1,2], [4,5], [7], [8,9], [11,12]]
 
     for (i,b) = enumerate(idx_predictor)
         if b == 3
