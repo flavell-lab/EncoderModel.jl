@@ -2,7 +2,7 @@
     generate_model_nl6(xs_s, idx_splits)
 
 model nl6 function
-predictors: velocity, θh, pumping, ang vel, curcature
+predictors: velocity, θh, pumping, ang vel, curvature
 
 pumping threshold term is removed
 
@@ -41,7 +41,7 @@ end
     generate_model_nl6_partial(xs_s, idx_splits, idx_valid)
 
 model nl6 partial function
-predictors: velocity, θh, pumping, ang vel, curcature
+predictors: velocity, θh, pumping, ang vel, curvature
 
 pumping threshold term is removed
 
@@ -84,14 +84,14 @@ end
     init_ps_model_nl6(xs, idx_predictor)
 
 initializes the model nl6 parameters
-predictors: velocity, θh, pumping, ang vel, curcature
+predictors: velocity, θh, pumping, ang vel, curvature
 
 Arguments
 ---------
 * `xs`: predictors array of `(n, t)` (not standardized)
 * `idx_predictor`: list of index for predictors. for full model, [1,2,3,4,5]. model w/o velocity: [2,3,4,5]
 """
-function init_ps_model_nl6(xs, idx_predictor=[1,2,3,4,5])    
+function init_ps_model_nl6(xs, idx_predictor=[1,2,3,4,5])
     n_xs = length(idx_predictor)
   
     ps_0 = []
@@ -105,8 +105,12 @@ function init_ps_model_nl6(xs, idx_predictor=[1,2,3,4,5])
             push!(ps_0, [0.])
             push!(ps_min, [-pi/2])
             push!(ps_max, [pi/2])
+        elseif b == 5
+            push!(ps_0, [0., 0., 0.])
+            push!(ps_min, [-pi/2, -pi/2, percentile(zstd(xs[b,:]), 5)])
+            push!(ps_max, [pi/2, pi/2, percentile(zstd(xs[b,:]), 95)])
         else
-            push!(ps_0, [0., 0., mean(xs[b,:])])
+            push!(ps_0, [0., 0., -mean(xs[b,:])/std(xs[b,:])])
             push!(ps_min, [-pi/2, -pi/2, percentile(zstd(xs[b,:]), 5)])
             push!(ps_max, [pi/2, pi/2, percentile(zstd(xs[b,:]), 95)])
         end
