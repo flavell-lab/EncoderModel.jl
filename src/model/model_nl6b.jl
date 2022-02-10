@@ -18,7 +18,7 @@ end
 # TODO: return valid idx and reg idx
 function init_ps_model_nl6b(xs)
     ps_0 = vcat(repeat([0.], 5), [0.1, 1., 0.])
-    ps_min = vcat(repeat([-pi/2.], 5), [0.015, -10., -10.])
+    ps_min = vcat(repeat([-pi/2.], 5), [0.03, -10., -10.])
     ps_max = vcat(repeat([pi/2.], 5), [1., 10., 10.])
     
     ps_0, ps_min, ps_max
