@@ -132,9 +132,12 @@ mutable struct ModelEncoderNL6 <: ModelEncoder
     ps_max
     idx_predictor
     f
+    list_idx_ps
+    list_idx_ps_reg
     
     function ModelEncoderNL6(xs, xs_s, idx_splits)
-        new(xs, xs_s, idx_splits, nothing, nothing, nothing, [1,2,3,4,5], nothing)
+        new(xs, xs_s, idx_splits, nothing, nothing, nothing,
+            [1,2,3,4,5], nothing, nothing, nothing)
     end
 end
 
@@ -151,6 +154,8 @@ function init_model_ps!(model::ModelEncoderNL6)
     model.ps_0 = ps_0
     model.ps_min = ps_min
     model.ps_max = ps_max
-
+    model.list_idx_ps = list_idx_ps
+    model.list_idx_ps_reg = list_idx_ps_reg
+    
     nothing
 end

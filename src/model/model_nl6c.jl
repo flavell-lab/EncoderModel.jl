@@ -50,7 +50,7 @@ function init_ps_model_nl6c(xs, idx_predictor=[1,2,3,4,5])
     
     
     list_idx_ps = vcat(list_idx_ps[idx_predictor]..., [14,15])
-    list_idx_ps_reg = vcat(list_idx_ps_reg[idx_predictor]..., [14]) # 14: \gamma, 16: bias
+    list_idx_ps_reg = vcat(list_idx_ps_reg[idx_predictor]..., [14])
 
     ps_0, ps_min, ps_max, list_idx_ps, list_idx_ps_reg
 end
@@ -64,9 +64,12 @@ mutable struct ModelEncoderNL6c <: ModelEncoder
     ps_max
     idx_predictor
     f
+    list_idx_ps
+    list_idx_ps_reg
     
     function ModelEncoderNL6c(xs, xs_s, idx_splits)
-        new(xs, xs_s, idx_splits, nothing, nothing, nothing, [1,2,3,4,5], nothing)
+        new(xs, xs_s, idx_splits, nothing, nothing, nothing,
+            [1,2,3,4,5], nothing, nothing, nothing)
     end
 end
 
@@ -83,6 +86,8 @@ function init_model_ps!(model::ModelEncoderNL6c)
     model.ps_0 = ps_0
     model.ps_min = ps_min
     model.ps_max = ps_max
+    model.list_idx_ps = list_idx_ps
+    model.list_idx_ps_reg = list_idx_ps_reg
 
     nothing
 end

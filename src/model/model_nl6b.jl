@@ -21,7 +21,11 @@ function init_ps_model_nl6b(xs)
     ps_min = vcat(repeat([-pi/2.], 5), [0.03, -10., -10.])
     ps_max = vcat(repeat([pi/2.], 5), [1., 10., 10.])
     
-    ps_0, ps_min, ps_max
+    list_idx_ps = [1,2,3,4,5,6,7,8]
+    list_idx_ps_reg = [1,2,3,4,5,7]
+    
+    ps_0, ps_min, ps_max, list_idx_ps, list_idx_ps_reg
+
 end
 
 mutable struct ModelEncoderNL6b <: ModelEncoder
@@ -33,9 +37,12 @@ mutable struct ModelEncoderNL6b <: ModelEncoder
     ps_max
     idx_predictor
     f
+    list_idx_ps
+    list_idx_ps_reg
     
     function ModelEncoderNL6b(xs, xs_s, idx_splits)
-        new(xs, xs_s, idx_splits, nothing, nothing, nothing, [1,2,3,4,5], nothing)
+        new(xs, xs_s, idx_splits, nothing, nothing, nothing,
+            [1,2,3,4,5], nothing, nothing, nothing)
     end
 end
 
@@ -46,11 +53,13 @@ function generate_model_f!(model::ModelEncoderNL6b)
 end
 
 function init_model_ps!(model::ModelEncoderNL6b)
-    ps_0, ps_min, ps_max = init_ps_model_nl6b(model.xs)
+    ps_0, ps_min, ps_max, list_idx_ps, list_idx_ps_reg = init_ps_model_nl6b(model.xs)
     
     model.ps_0 = ps_0
     model.ps_min = ps_min
     model.ps_max = ps_max
+    model.list_idx_ps = list_idx_ps
+    model.list_idx_ps_reg = list_idx_ps_reg
 
     nothing
 end
