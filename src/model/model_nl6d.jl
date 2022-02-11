@@ -1,5 +1,5 @@
 # nl6d: fixed threshold
-function generate_model_nl6d(xs_s, u_xs, idx_splits)
+function generate_model_nl6d(xs_s, list_θ, idx_splits)
     x1 = xs_s[1,:] # velocity
     x2 = xs_s[2,:] # θh
     x3 = xs_s[3,:] # pumping
@@ -9,18 +9,18 @@ function generate_model_nl6d(xs_s, u_xs, idx_splits)
     return function (ps)
         ps[12] .+ ps[11] .* ewma(ps[10],
             (sin(ps[1]) .* x1 .+ cos(ps[1])) .*
-            (sin(ps[2]) .* (1 .- 2 .* lesser.(x1, u_xs[1])) .+ cos(ps[2])) .*
+            (sin(ps[2]) .* (1 .- 2 .* lesser.(x1, list_θ[1])) .+ cos(ps[2])) .*
 
             (sin(ps[3]) .* x2 .+ cos(ps[3])) .*
-            (sin(ps[4]) .* (1 .- 2 .* lesser.(x2, u_xs[2])) .+ cos(ps[4])) .*
+            (sin(ps[4]) .* (1 .- 2 .* lesser.(x2, list_θ[2])) .+ cos(ps[4])) .*
 
             (sin(ps[5]) .* x3 .+ cos(ps[5])) .*
 
             (sin(ps[6]) .* x4 .+ cos(ps[6])) .*
-            (sin(ps[7]) .* (1 .- 2 .* lesser.(x4, u_xs[4])) .+ cos(ps[7])) .*
+            (sin(ps[7]) .* (1 .- 2 .* lesser.(x4, list_θ[4])) .+ cos(ps[7])) .*
 
             (sin(ps[8]) .* x5 .+ cos(ps[8])) .*
-            (sin(ps[9]) .* (1 .- 2 .* lesser.(x5, u_xs[5])) .+ cos(ps[9])), idx_splits)
+            (sin(ps[9]) .* (1 .- 2 .* lesser.(x5, list_θ[5])) .+ cos(ps[9])), idx_splits)
     end
 end
 
@@ -71,11 +71,14 @@ mutable struct ModelEncoderNL6d <: ModelEncoder
 end
 
 function generate_model_f!(model::ModelEncoderNL6d)
-    u_xs = zeros(eltype(model.xs), 5)
+    list_θ = zeros(eltype(model.xs), 5)
     for i = 1:5
-        u_xs[i] = mean(model.xs[i,:])
+        u = mean(model.xs[i,:])
+        s = std(model.xs[i,:])
+        
+        list_θ[i] = i == 5 ? 0 : -u/s # 5: curvature. set to mean in real scale
     end
-    model.f = generate_model_nl6d(model.xs_s, u_xs, model.idx_splits)
+    model.f = generate_model_nl6d(model.xs_s, list_θ, model.idx_splits)
     
     nothing
 end

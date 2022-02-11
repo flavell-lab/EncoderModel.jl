@@ -38,14 +38,15 @@ function init_ps_model_nl6c(xs, idx_predictor=[1,2,3,4,5])
             push!(ps_min, [-pi/2])
             push!(ps_max, [pi/2])
         else
-            push!(ps_0, [0., 0., -mean(xs[b,:])/std(xs[b,:])])
+            θ = b == 5 ? 0 : -mean(xs[b,:])/std(xs[b,:])
+            push!(ps_0, [0., 0., θ])
             push!(ps_min, [-pi/2, -pi/2, percentile(zstd(xs[b,:]), 5)])
             push!(ps_max, [pi/2, pi/2, percentile(zstd(xs[b,:]), 95)])
         end
     end
-    ps_0 = vcat(ps_0..., [1., 0.])
-    ps_min = vcat(ps_min..., [-10., -10.])
-    ps_max = vcat(ps_max..., [10., 10.])
+    ps_0 = vcat(ps_0..., [0.1, 1., 0.])
+    ps_min = vcat(ps_min..., [0.03, -10., -10.])
+    ps_max = vcat(ps_max..., [1., 10., 10.])
     
     
     list_idx_ps = vcat(list_idx_ps[idx_predictor]..., [14,15])

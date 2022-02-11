@@ -105,12 +105,9 @@ function init_ps_model_nl6(xs, idx_predictor=[1,2,3,4,5])
             push!(ps_0, [0.])
             push!(ps_min, [-pi/2])
             push!(ps_max, [pi/2])
-        elseif b == 5
-            push!(ps_0, [0., 0., 0.])
-            push!(ps_min, [-pi/2, -pi/2, percentile(zstd(xs[b,:]), 5)])
-            push!(ps_max, [pi/2, pi/2, percentile(zstd(xs[b,:]), 95)])
         else
-            push!(ps_0, [0., 0., -mean(xs[b,:])/std(xs[b,:])])
+            θ = b == 5 ? 0 : -mean(xs[b,:])/std(xs[b,:])
+            push!(ps_0, [0., 0., θ])
             push!(ps_min, [-pi/2, -pi/2, percentile(zstd(xs[b,:]), 5)])
             push!(ps_max, [pi/2, pi/2, percentile(zstd(xs[b,:]), 95)])
         end
