@@ -17,7 +17,7 @@ export
     n_ps,
     generate_model_f!,
     init_model_ps!,
-    lesser
+    lesser,
 
     # nl5
     generate_model_nl5,
