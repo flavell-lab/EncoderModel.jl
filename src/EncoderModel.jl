@@ -36,10 +36,12 @@ export
     init_ps_model_nl6c,
     generate_model_nl6d,
     init_ps_model_nl6d,
+    init_ps_model_nl6e,
     ModelEncoderNL6,
     ModelEncoderNL6a,
     ModelEncoderNL6b,
     ModelEncoderNL6c,
-    ModelEncoderNL6d
+    ModelEncoderNL6d,
+    ModelEncoderNL6e
 
 end
