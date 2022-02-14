@@ -24,10 +24,9 @@ function fit_model_nlopt_bound(trace, model, f_cost, ps_0, ps_min, ps_max,
         max_time=30, xtol=1e-4, ftol=1e-4, max_eval=-1)
     
     f(ps) = f_cost(trace, model(ps), idx_trace, idx_behavior)
-    g(ps) = ForwardDiff.gradient(f, ps)
     function cost(ps::Vector, grad::Vector)
         if length(grad) > 0
-            grad .= g(ps)
+            ForwardDiff.gradient!(grad, f, ps)
         end
         return f(ps)
     end
@@ -59,10 +58,9 @@ function fit_model_nlopt_bound_reg(trace, model::Function, f_cost::Function, ps_
         max_time=30, xtol=1e-4, ftol=1e-4, max_eval=-1)
     
     f(ps) = f_cost(trace, model(ps), idx_trace, idx_behavior) .+ λ * f_reg(ps[idx_ps])
-    g(ps) = ForwardDiff.gradient(f, ps)
     function cost(ps::Vector, grad::Vector)
         if length(grad) > 0
-            grad .= g(ps)
+            ForwardDiff.gradient!(grad, f, ps)
         end
         return f(ps)
     end
