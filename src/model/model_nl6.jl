@@ -52,7 +52,7 @@ Arguments
 e.g. `[1:800, 801:1600] for 2 videos merged with each 800 time points`
 * `idx_valid`: list of valid parameter index. e.g. model with pumping only should be [7,8,9,16,17,18]
 """
-function generate_model_nl6_partial(xs_s, idx_valid, ewma_trim, idx_split)
+function generate_model_nl6_partial(xs_s, idx_valid, ewma_trim, idx_splits)
     x1 = xs_s[1,:] # velocity
     x2 = xs_s[2,:] # θh
     x3 = xs_s[3,:] # pumping
