@@ -12,7 +12,7 @@ Arguments
 * `idx_splits`: list of index range for time points splits.
 e.g. `[1:800, 801:1600] for 2 videos merged with each 800 time points`
 """
-function generate_model_nl6(xs_s, idx_splits)
+function generate_model_nl6(xs_s, ewma_trim, idx_splits)
     x1 = xs_s[1,:] # velocity
     x2 = xs_s[2,:] # θh
     x3 = xs_s[3,:] # pumping
@@ -20,8 +20,7 @@ function generate_model_nl6(xs_s, idx_splits)
     x5 = xs_s[5,:] #curvature
     
     return function (ps)
-        ps[16] .+ ps[15] .* ewma(ps[14],
-            (sin(ps[1]) .* x1 .+ cos(ps[1])) .*
+        ps[16] .+ ps[15] .* ewma((sin(ps[1]) .* x1 .+ cos(ps[1])) .*
             (sin(ps[2]) .* (1 .- 2 .* lesser.(x1, ps[3])) .+ cos(ps[2])) .*
 
             (sin(ps[4]) .* x2 .+ cos(ps[4])) .*
@@ -33,7 +32,7 @@ function generate_model_nl6(xs_s, idx_splits)
             (sin(ps[9]) .* (1 .- 2 .* lesser.(x4, ps[10])) .+ cos(ps[9])) .*
 
             (sin(ps[11]) .* x5 .+ cos(ps[11])) .*
-            (sin(ps[12]) .* (1 .- 2 .* lesser.(x5, ps[13])) .+ cos(ps[12])), idx_splits)
+            (sin(ps[12]) .* (1 .- 2 .* lesser.(x5, ps[13])) .+ cos(ps[12])), ps[14], ewma_trim, idx_splits)
     end
 end
 
@@ -53,7 +52,7 @@ Arguments
 e.g. `[1:800, 801:1600] for 2 videos merged with each 800 time points`
 * `idx_valid`: list of valid parameter index. e.g. model with pumping only should be [7,8,9,16,17,18]
 """
-function generate_model_nl6_partial(xs_s, idx_splits, idx_valid)
+function generate_model_nl6_partial(xs_s, ewma_trim, idx_splits, idx_valid)
     x1 = xs_s[1,:] # velocity
     x2 = xs_s[2,:] # θh
     x3 = xs_s[3,:] # pumping
@@ -63,8 +62,7 @@ function generate_model_nl6_partial(xs_s, idx_splits, idx_valid)
     return function (ps_::AbstractVector{T}) where T
         ps = zeros(T, 16)
         ps[idx_valid] .= ps_
-        ps[16] .+ ps[15] .* ewma(ps[14],
-            (sin(ps[1]) .* x1 .+ cos(ps[1])) .*
+        ps[16] .+ ps[15] .* ewma((sin(ps[1]) .* x1 .+ cos(ps[1])) .*
             (sin(ps[2]) .* (1 .- 2 .* lesser.(x1, ps[3])) .+ cos(ps[2])) .*
 
             (sin(ps[4]) .* x2 .+ cos(ps[4])) .*
@@ -76,7 +74,7 @@ function generate_model_nl6_partial(xs_s, idx_splits, idx_valid)
             (sin(ps[9]) .* (1 .- 2 .* lesser.(x4, ps[10])) .+ cos(ps[9])) .*
 
             (sin(ps[11]) .* x5 .+ cos(ps[11])) .*
-            (sin(ps[12]) .* (1 .- 2 .* lesser.(x5, ps[13])) .+ cos(ps[12])), idx_splits)
+            (sin(ps[12]) .* (1 .- 2 .* lesser.(x5, ps[13])) .+ cos(ps[12])), ps[14], ewma_trim, idx_splits)
     end
 end
 
@@ -126,6 +124,7 @@ end
 mutable struct ModelEncoderNL6 <: ModelEncoder
     xs
     xs_s
+    ewma_trim::Int
     idx_splits::Union{Vector{UnitRange{Int64}}, Vector{Int64}}
     ps_0
     ps_min
@@ -135,14 +134,14 @@ mutable struct ModelEncoderNL6 <: ModelEncoder
     list_idx_ps
     list_idx_ps_reg
     
-    function ModelEncoderNL6(xs, xs_s, idx_splits)
-        new(xs, xs_s, idx_splits, nothing, nothing, nothing,
+    function ModelEncoderNL6(xs, xs_s, ewma_trim, idx_splits)
+        new(xs, xs_s, ewma_trim, idx_splits, nothing, nothing, nothing,
             [1,2,3,4,5], nothing, nothing, nothing)
     end
 end
 
 function generate_model_f!(model::ModelEncoderNL6)
-    model.f = generate_model_nl6(model.xs_s, model.idx_splits)
+    model.f = generate_model_nl6(model.xs_s, model.ewma_trim, model.idx_splits)
     
     nothing
 end

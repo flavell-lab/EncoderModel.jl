@@ -1,25 +1,64 @@
+#### component functions
 zstd = FlavellBase.standardize
 logistic(x,x0,k) = 1 / (1 + exp(-k * (x - x0)))
 leaky_logistic(x,x0,k,m) = logistic(x,x0,k) + m * (x - x0)
 lesser(x,x0) = leaky_logistic(x0,x,50,1e-3)
 
-function ewma(λ::T, x, idx_splits) where {T}
-    return_array = zeros(T, idx_splits[end][end])
-    for split = idx_splits
-        max_t = length(split)
-        x_avg = zeros(T, max_t)
-        s = sum([exp(-(max_t-t)*λ) for t=1:max_t])
-        x_avg[1] = x[split[1]] / s
-        for t=2:max_t
-            t_x = split[1] + t -1
-            x_avg[t] = T(x_avg[t-1] * (s-1) / s + x[t_x] / s)
-        end
-        return_array[split] = x_avg
+function ewma(x, λ::T, trim::Int) where T
+    max_t = length(x)
+    x_ewma = zeros(T, max_t)
+    s = T(0.)
+    for t = 1:max_t
+        s += exp(-(max_t-t)*λ)
     end
-
-    return return_array
+    
+    x_ewma[trim+1] = x[trim+1] / s
+    @inbounds for t = (trim+2):max_t
+        x_ewma[t] = (x_ewma[t-1] * (s-1) / s + x[t] / s)
+    end
+    
+    x_ewma
 end
 
+
+function ewma(x, λ::T, trim::Int, idx_splits::Vector{UnitRange{Int}}) where T
+    max_t = length(x)
+    x_ewma = zeros(T, max_t)
+
+    for split = idx_splits
+        ewma!(x_ewma[split], (@view x[split]), λ, trim)
+    end
+    
+    x_ewma
+end
+
+function ewma!(result, x, λ, trim::Int)
+    max_t = length(x)
+    # x_ewma = zeros(max_t)
+    s = 0
+    for t = 1:max_t
+        s += exp(-(max_t-t)*λ)
+    end
+    
+    result[trim+1] = x[trim+1] / s
+    @inbounds for t = (trim+2):max_t
+        result[t] = (result[t-1] * (s-1) / s + x[t] / s)
+    end
+    
+    result
+end
+
+function ewma!(result, x, λ, trim::Int, idx_splits::Vector{UnitRange{Int}})
+    max_t = length(x)
+
+    for split = idx_splits
+        ewma!((@view result[split]), (@view x[split]), λ, trim)
+    end
+    
+    result
+end
+
+#### Model definitions
 abstract type ModelEncoder end
 
 function n_ps(model::ModelEncoder)
