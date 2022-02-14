@@ -29,6 +29,7 @@ end
 mutable struct ModelEncoderNL6a <: ModelEncoder
     xs
     xs_s
+    ewma_trim::Int
     idx_splits::Union{Vector{UnitRange{Int64}}, Vector{Int64}}
     ps_0
     ps_min
@@ -38,8 +39,8 @@ mutable struct ModelEncoderNL6a <: ModelEncoder
     list_idx_ps
     list_idx_ps_reg
     
-    function ModelEncoderNL6a(xs, xs_s, idx_splits)
-        new(xs, xs_s, idx_splits, nothing, nothing, nothing,
+    function ModelEncoderNL6a(xs, xs_s, ewma_trim, idx_splits)
+        new(xs, xs_s, ewma_trim, idx_splits, nothing, nothing, nothing,
             [1,2,3,4,5], nothing, nothing, nothing)
     end
 end

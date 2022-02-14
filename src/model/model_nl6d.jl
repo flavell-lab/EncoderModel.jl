@@ -1,5 +1,5 @@
 # nl6d: fixed threshold
-function generate_model_nl6d(xs_s, list_θ, idx_splits)
+function generate_model_nl6d(xs_s, list_θ, ewma_trim, idx_splits)
     x1 = xs_s[1,:] # velocity
     x2 = xs_s[2,:] # θh
     x3 = xs_s[3,:] # pumping
@@ -7,8 +7,7 @@ function generate_model_nl6d(xs_s, list_θ, idx_splits)
     x5 = xs_s[5,:] #curvature
     
     return function (ps)
-        ps[12] .+ ps[11] .* ewma(ps[10],
-            (sin(ps[1]) .* x1 .+ cos(ps[1])) .*
+        ps[12] .+ ps[11] .* ewma((sin(ps[1]) .* x1 .+ cos(ps[1])) .*
             (sin(ps[2]) .* (1 .- 2 .* lesser.(x1, list_θ[1])) .+ cos(ps[2])) .*
 
             (sin(ps[3]) .* x2 .+ cos(ps[3])) .*
@@ -20,7 +19,7 @@ function generate_model_nl6d(xs_s, list_θ, idx_splits)
             (sin(ps[7]) .* (1 .- 2 .* lesser.(x4, list_θ[4])) .+ cos(ps[7])) .*
 
             (sin(ps[8]) .* x5 .+ cos(ps[8])) .*
-            (sin(ps[9]) .* (1 .- 2 .* lesser.(x5, list_θ[5])) .+ cos(ps[9])), idx_splits)
+            (sin(ps[9]) .* (1 .- 2 .* lesser.(x5, list_θ[5])) .+ cos(ps[9])), ps[10], ewma_trim, idx_splits)
     end
 end
 
@@ -58,6 +57,7 @@ end
 mutable struct ModelEncoderNL6d <: ModelEncoder
     xs
     xs_s
+    ewma_trim::Int
     idx_splits::Union{Vector{UnitRange{Int64}}, Vector{Int64}}
     ps_0
     ps_min
@@ -67,8 +67,8 @@ mutable struct ModelEncoderNL6d <: ModelEncoder
     list_idx_ps
     list_idx_ps_reg
     
-    function ModelEncoderNL6d(xs, xs_s, idx_splits)
-        new(xs, xs_s, idx_splits, nothing, nothing, nothing,
+    function ModelEncoderNL6d(xs, xs_s, ewma_trim, idx_splits)
+        new(xs, xs_s, ewma_trim, idx_splits, nothing, nothing, nothing,
             [1,2,3,4,5], nothing, nothing, nothing)
     end
 end
@@ -81,7 +81,7 @@ function generate_model_f!(model::ModelEncoderNL6d)
         
         list_θ[i] = i == 5 ? 0 : -u/s # 5: curvature. set to mean in real scale
     end
-    model.f = generate_model_nl6d(model.xs_s, list_θ, model.idx_splits)
+    model.f = generate_model_nl6d(model.xs_s, list_θ, model.ewma_trim, model.idx_splits)
     
     nothing
 end
