@@ -26,7 +26,7 @@ function ewma(x, λ::T, trim::Int, idx_splits::Vector{UnitRange{Int}}) where T
     x_ewma = zeros(T, max_t)
 
     for split = idx_splits
-        ewma!(x_ewma[split], (@view x[split]), λ, trim)
+        ewma!((@view x_ewma[split]), (@view x[split]), λ, trim)
     end
     
     x_ewma
