@@ -1,6 +1,6 @@
 function fit_model_glopt_bound(trace, model, f_cost, ps_0, ps_min, ps_max,
         idx_trace, idx_behavior, optimizer=ADAM(); max_iter=1000)
-    cost_model(ps, x) = f_cost(model(ps)[idx_behavior], trace[idx_trace])
+    cost_model(ps, x) = f_cost(trace, model(ps), idx_trace, idx_behavior)
     f_opt_cost = OptimizationFunction(cost_model, GalacticOptim.AutoForwardDiff())
     prob_opt = OptimizationProblem(f_opt_cost, ps_0, lb=ps_min, ub=ps_max)
     opt_sol = solve(prob_opt, optimizer, maxiters=max_iter)
@@ -11,7 +11,7 @@ end
 function fit_model_glopt_bound_reg(trace, model, f_cost, ps_0, ps_min, ps_max, 
         idx_trace, idx_behavior, optimizer=ADAM(); 
         λ, f_reg::Function, idx_ps, max_iter=1000)
-    cost_model(ps, x) = f_cost(model(ps)[idx_behavior], trace[idx_trace]) .+ λ * f_reg(ps[idx_ps])
+    cost_model(ps, x) = f_cost(trace, model(ps), idx_trace, idx_behavior) .+ λ * f_reg(ps[idx_ps])
     f_opt_cost = OptimizationFunction(cost_model, GalacticOptim.AutoForwardDiff())
     prob_opt = OptimizationProblem(f_opt_cost, ps_0, lb=ps_min, ub=ps_max)
     opt_sol = solve(prob_opt, optimizer, maxiters=max_iter)
@@ -23,7 +23,7 @@ function fit_model_nlopt_bound(trace, model, f_cost, ps_0, ps_min, ps_max,
         idx_trace, idx_behavior, optimizer_g, optimizer_l;
         max_time=30, xtol=1e-4, ftol=1e-4, max_eval=-1)
     
-    f(ps) = f_cost(model(ps)[idx_behavior], trace[idx_trace])
+    f(ps) = f_cost(trace, model(ps), idx_trace, idx_behavior)
     g(ps) = ForwardDiff.gradient(f, ps)
     function cost(ps::Vector, grad::Vector)
         if length(grad) > 0
@@ -58,7 +58,7 @@ function fit_model_nlopt_bound_reg(trace, model::Function, f_cost::Function, ps_
         λ, f_reg::Function, idx_ps,
         max_time=30, xtol=1e-4, ftol=1e-4, max_eval=-1)
     
-    f(ps) = f_cost(model(ps)[idx_behavior], trace[idx_trace]) .+ λ * f_reg(ps[idx_ps])
+    f(ps) = f_cost(trace, model(ps), idx_trace, idx_behavior) .+ λ * f_reg(ps[idx_ps])
     g(ps) = ForwardDiff.gradient(f, ps)
     function cost(ps::Vector, grad::Vector)
         if length(grad) > 0
