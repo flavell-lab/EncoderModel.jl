@@ -6,8 +6,10 @@ function init_ps_model_nl6e(xs, idx_threshold=[1,2,4,5])
     list_idx_ps = []
     list_idx_ps_reg = []
     idx_ps = [[1,[2,3]],[4,[5,6]],[7,[]],[8,[9,10]],[11,[12,13]]]
-    idx_ps_reg = [[1,[2,]],[4,[5,]],[7,[]],[8,[9,]],[11,[12,]]]
+    # idx_ps_reg = [[1,[2,]],[3,[4,]],[5,[]],[6,[7,]],[8,[9,]]]
 
+    i_reg = 1
+    
     for b = 1:5
         if b in idx_threshold
             θ = b == 5 ? 0 : -mean(xs[b,:])/std(xs[b,:])
@@ -16,14 +18,18 @@ function init_ps_model_nl6e(xs, idx_threshold=[1,2,4,5])
             push!(ps_max, [pi/2, pi/2, percentile(zstd(xs[b,:]), 95)])
             push!(list_idx_ps, idx_ps[b][1])
             push!(list_idx_ps, idx_ps[b][2])
-            push!(list_idx_ps_reg, idx_ps_reg[b][1])
-            push!(list_idx_ps_reg, idx_ps_reg[b][2])
+            push!(list_idx_ps_reg, [i_reg,i_reg+1])
+            i_reg += 3
+            # push!(list_idx_ps_reg, idx_ps_reg[b][1])
+            # push!(list_idx_ps_reg, idx_ps_reg[b][2])
         else
             push!(ps_0, [0.])
             push!(ps_min, [-pi/2])
             push!(ps_max, [pi/2])
             push!(list_idx_ps, idx_ps[b][1])
-            push!(list_idx_ps_reg, idx_ps_reg[b][1])
+            push!(list_idx_ps_reg, i_reg)
+            i_reg += 1
+            # push!(list_idx_ps_reg, idx_ps_reg[b][1])
         end
     end
     
@@ -32,7 +38,7 @@ function init_ps_model_nl6e(xs, idx_threshold=[1,2,4,5])
     ps_max = vcat(ps_max..., [1., 10., 10.])
 
     list_idx_ps = vcat(sort(vcat(list_idx_ps...)), [14,15,16])
-    list_idx_ps_reg = vcat(sort(vcat(list_idx_ps_reg...)), [15]) # 14: \gamma, 16: bias
+    list_idx_ps_reg = vcat(sort(vcat(list_idx_ps_reg...)), [i_reg+1]) # 14: \gamma, 16: bias
 
     ps_0, ps_min, ps_max, list_idx_ps, list_idx_ps_reg
 end
