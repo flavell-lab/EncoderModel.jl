@@ -115,3 +115,41 @@ function init_ps_model_nl5(xs, idx_predictor=[1,2,3,4,5])
     
     ps_0, ps_min, ps_max, list_idx_ps, list_idx_ps_reg
 end
+
+mutable struct ModelEncoderNL5 <: ModelEncoder
+    xs
+    xs_s
+    ewma_trim::Int
+    idx_splits::Union{Vector{UnitRange{Int64}}, Vector{Int64}}
+    ps_0
+    ps_min
+    ps_max
+    idx_predictor
+    f
+    list_idx_ps
+    list_idx_ps_reg
+    
+    function ModelEncoderNL5(xs, xs_s, ewma_trim, idx_splits)
+        new(xs, xs_s, ewma_trim, idx_splits, nothing, nothing, nothing,
+            [1,2,3,4,5], nothing, nothing, nothing)
+    end
+end
+
+function generate_model_f!(model::ModelEncoderNL5)
+    model.f = generate_model_nl5(model.xs_s, model.ewma_trim, model.idx_splits)
+    
+    nothing
+end
+
+function init_model_ps!(model::ModelEncoderNL5)
+    ps_0, ps_min, ps_max, list_idx_ps, list_idx_ps_reg = init_ps_model_nl5(model.xs,
+        model.idx_predictor)
+    
+    model.ps_0 = ps_0
+    model.ps_min = ps_min
+    model.ps_max = ps_max
+    model.list_idx_ps = list_idx_ps
+    model.list_idx_ps_reg = list_idx_ps_reg
+    
+    nothing
+end
