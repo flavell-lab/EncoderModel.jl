@@ -46,5 +46,11 @@ export
     ModelEncoderNL6c,
     ModelEncoderNL6d,
     ModelEncoderNL6e,
-    ModelEncoderNL6f
+    ModelEncoderNL6f,
+
+    # nl7
+    generate_model_nl7,
+    init_ps_model_nl7,
+    ModelEncoderNL7
+
 end
