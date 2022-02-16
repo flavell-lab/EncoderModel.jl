@@ -10,7 +10,7 @@ Arguments
 * `idx_splits`: list of index range for time points splits.
 e.g. `[1:800, 801:1600] for 2 videos merged with each 800 time points`
 """
-function generate_model_nl5(xs_s, idx_splits)
+function generate_model_nl5(xs_s, ewma_trim, idx_splits)
     x1 = xs_s[1,:] # velocity
     x2 = xs_s[2,:] # θh
     x3 = xs_s[3,:] # pumping
@@ -18,8 +18,7 @@ function generate_model_nl5(xs_s, idx_splits)
     x5 = xs_s[5,:] #curvature
     
     return function (ps)
-        ps[18] .+ ps[17] .* ewma(ps[16],
-            (sin(ps[1]) .* x1 .+ cos(ps[1])) .*
+        ps[18] .+ ps[17] .* ewma((sin(ps[1]) .* x1 .+ cos(ps[1])) .*
             (sin(ps[2]) .* (1 .- 2 .* lesser.(x1, ps[3])) .+ cos(ps[2])) .*
 
             (sin(ps[4]) .* x2 .+ cos(ps[4])) .*
@@ -32,7 +31,8 @@ function generate_model_nl5(xs_s, idx_splits)
             (sin(ps[11]) .* (1 .- 2 .* lesser.(x4, ps[12])) .+ cos(ps[11])) .*
 
             (sin(ps[13]) .* x5 .+ cos(ps[13])) .*
-            (sin(ps[14]) .* (1 .- 2 .* lesser.(x5, ps[15])) .+ cos(ps[14])), idx_splits)
+            (sin(ps[14]) .* (1 .- 2 .* lesser.(x5, ps[15])) .+ cos(ps[14])),
+                ps[16], ewma_trim, idx_splits)
     end
 end
 
@@ -92,17 +92,17 @@ function init_ps_model_nl5(xs, idx_predictor=[1,2,3,4,5])
     n_xs = length(idx_predictor)
     
     ps_0 = vcat(repeat([0.0, 0.0, 0.0], n_xs), [0.1, 1., 0.])
-    ps_min = vcat(repeat([-pi/2], n_xs * 3), [0.001, -2, -2])
-    ps_max = vcat(repeat([pi/2], n_xs * 3), [1.0, 2., 2.])
+    ps_min = vcat(repeat([-pi/2], n_xs * 3), [0.03, -10, -10])
+    ps_max = vcat(repeat([pi/2], n_xs * 3), [1.0, 10., 10.])
     
     list_idx_ps_reg = []
     list_idx_ps = []
     for (i, b) = enumerate(idx_predictor)
         ps_min[3*i], ps_max[3*i] = percentile(zstd(xs[b,:]), [5,95])
-        if b != 3
-            ps_0[3*i] = mean(xs[b,:]) # 0 before zstd
-        else # pumping threshold
+        if b in [3,5] # pumping, ang_vel threshold
             ps_0[3*i] = 0. # mean before zstd
+        else
+            ps_0[3*i] = -mean(xs[b,:])/std(xs[b,:]) # 0 before zstd
         end
         push!(list_idx_ps, 3*b-2)
         push!(list_idx_ps, 3*b-1)
