@@ -12,10 +12,11 @@ function ewma(x, λ::T, trim::Int) where T
         s += exp(-(max_t-t)*λ)
     end
     
-    x_ewma[trim+1] = x[trim+1] / s
-    @inbounds for t = (trim+2):max_t
+    x_ewma[1] = x[1] / s
+    @inbounds for t = 2:max_t
         x_ewma[t] = (x_ewma[t-1] * (s-1) / s + x[t] / s)
     end
+    x_ewma[1:trim] .= 0
     
     x_ewma
 end
@@ -40,10 +41,11 @@ function ewma!(result, x, λ, trim::Int)
         s += exp(-(max_t-t)*λ)
     end
     
-    result[trim+1] = x[trim+1] / s
-    @inbounds for t = (trim+2):max_t
+    result[1] = x[1] / s
+    @inbounds for t = 2:max_t
         result[t] = (result[t-1] * (s-1) / s + x[t] / s)
     end
+    result[1:trim] .= 0
     
     result
 end
