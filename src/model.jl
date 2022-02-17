@@ -78,3 +78,4 @@ include("model/model_nl6e.jl")
 include("model/model_nl6f.jl")
 
 include("model/model_nl7.jl")
+include("model/model_nl7a.jl")
