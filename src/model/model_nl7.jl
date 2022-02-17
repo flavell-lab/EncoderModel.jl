@@ -47,7 +47,7 @@ end
 function init_ps_model_nl7(xs, idx_predictor=1:5)
     list_comp_group = [[1,2],[3,4],[5],[6],[7]]
     
-    init_ps_model_nl7_component(xs, list_comp_group[idx_predictor])
+    init_ps_model_nl7_component(xs, vcat(list_comp_group[idx_predictor]...))
 end
 
 mutable struct ModelEncoderNL7 <: ModelEncoder
