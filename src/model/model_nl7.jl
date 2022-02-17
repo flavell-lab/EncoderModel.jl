@@ -17,6 +17,28 @@ function generate_model_nl7(xs_s, list_θ, ewma_trim, idx_splits)
     end
 end
 
+function generate_model_nl7_partial(xs_s, idx_valid, list_θ, ewma_trim, idx_splits)
+    x1 = xs_s[1,:] # velocity
+    x2 = xs_s[2,:] # θh
+    x3 = xs_s[3,:] # pumping
+    x4 = xs_s[4,:] # ang vel
+    x5 = xs_s[5,:] #curvature
+    
+    return function (ps_::Vector{T}) where T
+        ps = zeros(T, 10)
+        ps[idx_valid] .= ps_
+
+        ewma((sin(ps[1]) .* (1 .- 2 .* lesser.(x1, list_θ[1])) .+ cos(ps[1])) .*
+            (ps[2] .* x1 .+
+                ps[3] .* x2 .+
+                ps[4] .* x2 .* lesser.(x2, list_θ[2]) .+
+                ps[5] .* x3 .+
+                ps[6] .* x4 .+
+                ps[7] .* x5 .+
+                ps[8]), ps[9], ewma_trim, idx_splits) .+ ps[10]
+    end
+end
+
 function init_ps_model_nl7_component(xs, idx_component=1:7)
     ps_0 = []
     ps_min = []
