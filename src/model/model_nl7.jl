@@ -17,37 +17,37 @@ function generate_model_nl7(xs_s, list_θ, ewma_trim, idx_splits)
     end
 end
 
-function init_ps_model_nl7(xs, idx_predictor=[0,1,2,3,4,5])  
+function init_ps_model_nl7_component(xs, idx_component=1:7)
     ps_0 = []
     ps_min = []
     ps_max = []
     list_idx_ps = []
     list_idx_ps_reg = []
-    
-    list_idx_ps = [[1], [2], [3,4], [5], [6], [7]]
-    list_idx_ps_reg = [[1], [2], [3,4], [5], [6], [7]]
-    
-    for (i,b) = enumerate(idx_predictor)
-        b_ = b + 1 
-        if b == 2
-            push!(ps_0, [0., 0.])
-            push!(ps_min, [-10., -10.])
-            push!(ps_max, [10., 10.])
-        else
-            push!(ps_0, 0.)
-            push!(ps_min, b == 0 ? -pi/2 : -10)
-            push!(ps_max, b == 0 ? pi/2 : 10)
-        end
+        
+    i = 1
+    for b = idx_component
+        push!(ps_0, 0.)
+        push!(ps_min, b == 1 ? -pi/2 : -10)
+        push!(ps_max, b == 1 ? pi/2 : 10)
+        push!(list_idx_ps, i)
+        push!(list_idx_ps_reg, i)
+        i += 1
     end
 
-    ps_0 = vcat(ps_0..., [0., 0.1, 0.])
+    ps_0 = vcat(ps_0..., [0., 0.1, 0.]) # offset inside, ewma, offset outside
     ps_min = vcat(ps_min..., [-10., 0.03, -10.])
     ps_max = vcat(ps_max..., [10., 1., 10.])
     
-    list_idx_ps = vcat(list_idx_ps[idx_predictor .+ 1]..., [8,9,10]) # bias inside, ewma, bias outside ewma
-    list_idx_ps_reg = vcat(list_idx_ps_reg[idx_predictor .+ 1]..., [8,10]) # 9: bias
+    list_idx_ps = vcat(list_idx_ps..., [8,9,10]) # bias inside, ewma, bias outside ewma
+    list_idx_ps_reg = vcat(list_idx_ps_reg..., [i,i+2]) # 9: bias
     
     ps_0, ps_min, ps_max, list_idx_ps, list_idx_ps_reg
+end
+
+function init_ps_model_nl7(xs, idx_predictor=1:5)
+    list_comp_group = [[1,2],[3,4],[5],[6],[7]]
+    
+    init_ps_model_nl7_component(xs, list_comp_group[idx_predictor])
 end
 
 mutable struct ModelEncoderNL7 <: ModelEncoder
