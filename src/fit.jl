@@ -53,7 +53,7 @@ function fit_model_nlopt_bound(trace, model, f_cost, ps_0, ps_min, ps_max,
 end
 
 function fit_model_nlopt_bound_reg(trace, model::Function, f_cost::Function, ps_0, ps_min, ps_max, 
-        idx_trace, idx_behavior, optimizer_g::Symbol, optimizer_l::Symbol;
+        idx_trace, idx_behavior, optimizer_g::Symbol, optimizer_l::Union{Symbol,Nothing};
         λ, f_reg::Function, idx_ps,
         max_time=30, xtol=1e-4, ftol=1e-4, max_eval=-1)
     
