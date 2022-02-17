@@ -53,6 +53,7 @@ export
     generate_model_nl7_partial,
     init_ps_model_nl7,
     init_ps_model_nl7_component,
-    ModelEncoderNL7
+    ModelEncoderNL7,
+    ModelEncoderNL7a
 
 end
