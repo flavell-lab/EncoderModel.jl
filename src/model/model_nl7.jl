@@ -29,7 +29,7 @@ function init_ps_model_nl7_component(xs, idx_component=1:7)
         push!(ps_0, 0.)
         push!(ps_min, b == 1 ? -pi/2 : -10)
         push!(ps_max, b == 1 ? pi/2 : 10)
-        push!(list_idx_ps, i)
+        push!(list_idx_ps, b)
         push!(list_idx_ps_reg, i)
         i += 1
     end
