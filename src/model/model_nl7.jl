@@ -17,6 +17,18 @@ function generate_model_nl7(xs_s, list_θ, ewma_trim, idx_splits)
     end
 end
 
+"""
+generate_model_nl7_partial
+
+list of components:
+1: velocity threshold
+2: velocity
+3: headangle
+4: headnagle threshold
+5: pumping
+6: ang vel
+7: curvature
+"""
 function generate_model_nl7_partial(xs_s, idx_valid, list_θ, ewma_trim, idx_splits)
     x1 = xs_s[1,:] # velocity
     x2 = xs_s[2,:] # θh
