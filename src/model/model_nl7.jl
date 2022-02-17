@@ -63,7 +63,7 @@ mutable struct ModelEncoderNL7 <: ModelEncoder
     list_idx_ps
     list_idx_ps_reg
     
-    function ModelEncoderNL7(xs, xs_s, ewma_trim, idx_splits, idx_predictor=[0,1,2,3,4,5])
+    function ModelEncoderNL7(xs, xs_s, ewma_trim, idx_splits, idx_predictor=[1,2,3,4,5])
         new(xs, xs_s, ewma_trim, idx_splits, nothing, nothing, nothing,
             idx_predictor, nothing, nothing, nothing)
     end
