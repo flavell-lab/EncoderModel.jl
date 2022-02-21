@@ -34,7 +34,7 @@ function generate_model_f!(model::ModelEncoderNL7a)
         model.list_θ = list_θ
     end
 
-    model.f = generate_model_nl7_partial(model.xs_s, model.list_idx_ps, list_θ, model.ewma_trim, model.idx_splits)
+    model.f = generate_model_nl7_partial(model.xs_s, model.list_idx_ps, model.list_θ, model.ewma_trim, model.idx_splits)
     
     nothing
 end
