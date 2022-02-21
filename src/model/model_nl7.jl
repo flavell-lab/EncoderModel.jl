@@ -73,7 +73,7 @@ function init_ps_model_nl7_component(xs, idx_component=1:7)
     ps_max = vcat(ps_max..., [10., 1., 10.])
     
     list_idx_ps = vcat(list_idx_ps..., [8,9,10]) # bias inside, ewma, bias outside ewma
-    list_idx_ps_reg = vcat(list_idx_ps_reg...) # 9: ewma, 10: bias
+    list_idx_ps_reg = vcat(list_idx_ps_reg..., [i]) # 9: ewma, 10: bias
     
     ps_0, ps_min, ps_max, list_idx_ps, list_idx_ps_reg
 end
