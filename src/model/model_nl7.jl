@@ -96,10 +96,11 @@ mutable struct ModelEncoderNL7 <: ModelEncoder
     f
     list_idx_ps
     list_idx_ps_reg
+    list_θ
     
     function ModelEncoderNL7(xs, xs_s, ewma_trim, idx_splits, idx_predictor=[1,2,3,4,5])
         new(xs, xs_s, ewma_trim, idx_splits, nothing, nothing, nothing,
-            idx_predictor, nothing, nothing, nothing)
+            idx_predictor, nothing, nothing, nothing, nothing)
     end
 end
 
@@ -107,15 +108,19 @@ function generate_model_f!(model::ModelEncoderNL7)
     if isnothing(model.list_idx_ps)
         error("list_idx_ps is nothing. run init_model_ps!")
     end
-    list_θ = zeros(eltype(model.xs), 5)
-    for i = 1:5
-        u = mean(model.xs[i,:])
-        s = std(model.xs[i,:])
-        
-        list_θ[i] = i == 5 ? 0 : -u/s # 5: curvature. set to mean in real scale
-    end
+    
+    if isnothing(model.list_θ)
+        list_θ = zeros(eltype(model.xs), 5)
+        for i = 1:5
+            u = mean(model.xs[i,:])
+            s = std(model.xs[i,:])
 
-    model.f = generate_model_nl7(model.xs_s, list_θ, model.ewma_trim, model.idx_splits)
+            list_θ[i] = i == 5 ? 0 : -u/s # 5: curvature. set to mean in real scale
+        end
+        model.list_θ = list_θ
+    end
+    
+    model.f = generate_model_nl7(model.xs_s, model.list_θ, model.ewma_trim, model.idx_splits)
     
     nothing
 end
