@@ -60,6 +60,7 @@ export
     generate_model_nl10c,
     generate_model_nl10c_partial,
     init_ps_model_nl10c,
-    init_ps_model_nl10c_component
+    init_ps_model_nl10c_component,
+    ModelEncoderNL10c
 
 end
