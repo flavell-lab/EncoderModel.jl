@@ -46,7 +46,7 @@ function init_ps_model_nl10c_component(xs, idx_component=1:4)
     ps_max = vcat(ps_max..., [10., 1., 10.])
     
     list_idx_ps = vcat(list_idx_ps..., [5,6,7]) # bias inside, ewma, bias outside
-    # list_idx_ps_reg = vcat(list_idx_ps_reg..., [list_idx_ps_reg[end]+2])
+    list_idx_ps_reg = vcat(list_idx_ps_reg..., [list_idx_ps_reg[end]+1])
     
     ps_0, ps_min, ps_max, list_idx_ps, list_idx_ps_reg
 end
