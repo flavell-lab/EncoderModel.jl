@@ -30,8 +30,8 @@ function init_ps_model_nl10d_component(xs, idx_component=1:4)
     ps_0 = []
     ps_min = []
     ps_max = []
-    list_idx_ps = []
-    list_idx_ps_reg = []
+    list_idx_ps = Int[]
+    list_idx_ps_reg = Int[]
         
     for (i, c) = enumerate(idx_component)
         push!(ps_0, 0.)
