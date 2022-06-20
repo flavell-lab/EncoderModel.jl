@@ -66,5 +66,10 @@ export
     generate_model_nl10d_partial,
     init_ps_model_nl10d,
     init_ps_model_nl10d_component,
-    ModelEncoderNL10d
+    ModelEncoderNL10d,
+    generate_model_nl10e,
+    generate_model_nl10e_partial,
+    init_ps_model_nl10e,
+    init_ps_model_nl10e_component,
+    ModelEncoderNL10e
 end
